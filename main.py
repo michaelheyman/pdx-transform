@@ -21,7 +21,7 @@ def get_latest_blob():
 
 
 def get_instructors(contents):
-    return set(map(lambda x: x.get("instructor", "TBD"), contents))
+    return set([x.get("instructor", "TBD") for x in contents])
 
 
 if __name__ == "__main__":
