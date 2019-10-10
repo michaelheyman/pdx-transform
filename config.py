@@ -15,5 +15,5 @@ def map_level(level):
     )
 
 
-BUCKET_NAME = os.environ.get("BUCKET_NAME", "my-different-bucket")
+BUCKET_NAME = os.environ.get("BUCKET_NAME", "processed-data")
 LOGGING_LEVEL = map_level(os.environ.get("LOGGING_LEVEL", "debug"))

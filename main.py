@@ -43,7 +43,7 @@ def load_local_blob():
     Returns:
         Dictionary: A dictionary representation of the contents of the file
     """
-    with open("blob.json") as json_file:
+    with open("rated-instructors.json") as json_file:
         return json.loads(json_file.read())
 
 
