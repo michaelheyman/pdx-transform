@@ -1,5 +1,6 @@
 import config
 import json
+import os
 from ratemyprofessors import RateMyProfessors
 from google.cloud import storage
 
@@ -7,14 +8,14 @@ storage_client = storage.Client()
 
 
 def get_latest_blob():
-    bucket_name = config.BUCKET_NAME
+    bucket_name = config.UNPROCESSED_BUCKET_NAME
     bucket = storage_client.lookup_bucket(bucket_name)
 
     if bucket is None:
         print("Bucket does not exist. Exiting program.")
         return None
 
-    blobs = list(storage_client.list_blobs(config.BUCKET_NAME))
+    blobs = list(storage_client.list_blobs(bucket_name))
     print(f"blobs {blobs}")
     latest_blob = max(blobs, key=lambda x: x.name)
 
@@ -43,11 +44,12 @@ def load_local_blob():
     Returns:
         Dictionary: A dictionary representation of the contents of the file
     """
-    with open("rated-instructors.json") as json_file:
+    filename = os.path.join(os.path.dirname(__file__), "blob.json")
+    with open(filename) as json_file:
         return json.loads(json_file.read())
 
 
-def rate_instructors(instructors):
+def rate_instructors(instructors, mock=False):
     """ Rate instructors according to their RateMyProfessor information
 
     Parameters:
@@ -69,6 +71,17 @@ def rate_instructors(instructors):
             }
     """
     assert isinstance(instructors, set)
+    if mock:
+        return {
+            "David D Ely": {
+                "firstName": "David",
+                "fullName": "David D Ely",
+                "lastName": "Ely",
+                "rating": 3.8,
+                "rmpId": 2290506,
+            }
+        }
+
     rated = {}
 
     for instructor in instructors:
@@ -88,6 +101,7 @@ def rate_instructors(instructors):
             rated[instructor] = {"fullName": instructor}
 
     print(rated)
+    return rated
 
 
 def inject_rated_instructors(contents, rated_instructors):
@@ -101,7 +115,7 @@ def inject_rated_instructors(contents, rated_instructors):
         List: The `contents` with the instructors field replaced with the
               instructor in `instructors`
     """
-    assert isinstance(contents, dict)
+    assert isinstance(contents, list)
     for course in contents:
         instructor_name = course["instructor"]
         if instructor_name in rated_instructors.keys():
@@ -114,14 +128,14 @@ if __name__ == "__main__":
     latest_blob = get_latest_blob()
     contents = latest_blob.download_as_string()
     try:
-        # contents_json = json.loads(contents)
-        contents_json = load_local_blob()
+        contents_json = json.loads(contents)
+        # contents_json = load_local_blob()
     except json.decoder.JSONDecodeError as e:
         print(f"Error decoding JSON: {e}")
         exit()
 
     instructors = get_instructors(contents_json)
     print(instructors)
-    rated_instructors = rate_instructors(instructors)
+    rated_instructors = rate_instructors(instructors, mock=True)
 
-    updated_contents = inject_rated_instructors(contents, rated_instructors)
+    updated_contents = inject_rated_instructors(contents_json, rated_instructors)
