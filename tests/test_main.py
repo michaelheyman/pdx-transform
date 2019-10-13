@@ -88,3 +88,131 @@ def test_get_latest_blob_returns_blob_when_only_one_blob_exists(
     assert mock_get_bucket.called == True
     assert mock_get_blobs.called == True
     assert latest_blob == {"name": "1234567890.json", "description": "latest-blob"}
+
+
+def test_rate_instructors_returns_empty_dict_when_no_instructors():
+    instructors = set()
+
+    rated_instructors = main.rate_instructors(instructors)
+
+    assert rated_instructors == {}
+
+
+@mock.patch("cloud_storage.main.get_instructor")
+def test_rate_instructors_returns_rated_instructor_when_instructor_rating(
+    mock_get_instructor
+):
+    mock_get_instructor.return_value = ("Jane", "Doe", 4.0, 12345)
+    instructors = {"Jane Doe"}
+
+    rated_instructors = main.rate_instructors(instructors)
+
+    assert rated_instructors == {
+        "Jane Doe": {
+            "fullName": "Jane Doe",
+            "firstName": "Jane",
+            "lastName": "Doe",
+            "rating": 4.0,
+            "rmpId": 12345,
+        }
+    }
+
+
+@mock.patch("cloud_storage.main.get_instructor")
+def test_rate_instructors_returns_multiple_rated_instructors(mock_get_instructor):
+    mock_get_instructor.side_effect = [
+        ("Jane", "Doe", 4.0, 12345),
+        ("John", "Doe", 3.5, 98765),
+    ]
+    instructors = {"Jane Doe", "John Doe"}
+
+    rated_instructors = main.rate_instructors(instructors)
+
+    assert rated_instructors == {
+        "Jane Doe": {
+            "fullName": "Jane Doe",
+            "firstName": "Jane",
+            "lastName": "Doe",
+            "rating": 4.0,
+            "rmpId": 12345,
+        },
+        "John Doe": {
+            "fullName": "John Doe",
+            "firstName": "John",
+            "lastName": "Doe",
+            "rating": 3.5,
+            "rmpId": 98765,
+        },
+    }
+
+
+@mock.patch("cloud_storage.main.get_instructor")
+def test_rate_instructors_returns_instructor_when_name_not_exists(mock_get_instructor):
+    mock_get_instructor.side_effect = [("Jane", "Doe", 4.0, 12345), ValueError()]
+    instructors = {"Jane Doe", "John Doe"}
+
+    rated_instructors = main.rate_instructors(instructors)
+
+    assert rated_instructors == {
+        "Jane Doe": {
+            "fullName": "Jane Doe",
+            "firstName": "Jane",
+            "lastName": "Doe",
+            "rating": 4.0,
+            "rmpId": 12345,
+        },
+        "John Doe": {"fullName": "John Doe"},
+    }
+
+
+def test_inject_rated_instructors_returns_unchanged_contents_if_empty():
+    contents = []
+    rated_instructors = []
+
+    main.inject_rated_instructors(contents, rated_instructors)
+
+    assert contents == []
+
+
+def test_inject_rated_instructors_returns_injected_instructor():
+    contents = [{"instructor": "Jane Doe"}]
+    rated_instructors = {
+        "Jane Doe": {
+            "fullName": "Jane Doe",
+            "firstName": "Jane",
+            "lastName": "Doe",
+            "rating": 4.0,
+            "rmpId": 12345,
+        }
+    }
+
+    main.inject_rated_instructors(contents, rated_instructors)
+
+    assert contents == [
+        {
+            "instructor": {
+                "fullName": "Jane Doe",
+                "firstName": "Jane",
+                "lastName": "Doe",
+                "rating": 4.0,
+                "rmpId": 12345,
+            }
+        }
+    ]
+
+
+def test_inject_rated_instructors_returns_contents_when_instructors_dont_match():
+    contents = [{"instructor": "Jane Doe"}]
+    rated_instructors = {
+        "John Doe": {
+            "fullName": "John Doe",
+            "firstName": "John",
+            "lastName": "Doe",
+            "rating": 3.5,
+            "rmpId": 98765,
+        }
+    }
+
+    main.inject_rated_instructors(contents, rated_instructors)
+
+    assert contents == contents

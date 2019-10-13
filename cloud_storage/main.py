@@ -58,7 +58,14 @@ def load_local_blob():
         return json.loads(json_file.read())
 
 
-def rate_instructors(instructors, mock=False):
+def get_instructor(instructor):
+    """ This is only here until I can figure out how to
+    mock this call in the unit tests
+    """
+    return RateMyProfessors.get_instructor(instructor)
+
+
+def rate_instructors(instructors):
     """ Rate instructors according to their RateMyProfessor information
 
     Parameters:
@@ -80,24 +87,11 @@ def rate_instructors(instructors, mock=False):
             }
     """
     assert isinstance(instructors, set)
-    if mock:
-        return {
-            "David D Ely": {
-                "firstName": "David",
-                "fullName": "David D Ely",
-                "lastName": "Ely",
-                "rating": 3.8,
-                "rmpId": 2290506,
-            }
-        }
-
     rated = {}
 
     for instructor in instructors:
         try:
-            first_name, last_name, rating, rmp_id = RateMyProfessors.get_instructor(
-                instructor
-            )
+            first_name, last_name, rating, rmp_id = get_instructor(instructor)
             rated[instructor] = {
                 "fullName": instructor,
                 "firstName": first_name,
@@ -145,6 +139,6 @@ if __name__ == "__main__":
 
     instructors = get_instructors(contents_json)
     print(instructors)
-    rated_instructors = rate_instructors(instructors, mock=True)
+    rated_instructors = rate_instructors(instructors)
 
     updated_contents = inject_rated_instructors(contents_json, rated_instructors)
