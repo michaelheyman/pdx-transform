@@ -1,8 +1,10 @@
+from collections import OrderedDict
+
 import mock
 import pytest
-from collections import OrderedDict
+
+from app import main
 from tests import mocks
-from cloud_storage import main
 
 
 @mock.patch("google.cloud.storage.Client.lookup_bucket")
@@ -48,7 +50,7 @@ def test_get_instructors_returns_empty_set_when_empty_instructors():
     assert instructor_set == set()
 
 
-@mock.patch("cloud_storage.main.get_bucket")
+@mock.patch("app.main.get_bucket")
 def test_get_latest_blob_returns_none_when_bucket_does_not_exist(mock_get_bucket):
     mock_get_bucket.return_value = None
 
@@ -58,39 +60,41 @@ def test_get_latest_blob_returns_none_when_bucket_does_not_exist(mock_get_bucket
     assert latest_blob is None
 
 
-@mock.patch("cloud_storage.main.get_blobs_list")
-@mock.patch("cloud_storage.main.get_bucket")
+@mock.patch("app.main.get_blobs_list")
+@mock.patch("app.main.get_bucket")
 def test_get_latest_blob_returns_blob_when_only_one_blob_exists(
     mock_get_bucket, mock_get_blobs
 ):
+    mock_blob = mock.Mock()
+    mock_blob.name = "1234567890.json"
     mock_get_bucket.return_value = "my-bucket"
-    mock_get_blobs.return_value = [
-        {"name": "1234567890.json", "description": "test-blob"}
-    ]
+    mock_get_blobs.return_value = [mock_blob]
 
     latest_blob = main.get_latest_blob()
 
     assert mock_get_bucket.called is True
     assert mock_get_blobs.called is True
-    assert latest_blob == {"name": "1234567890.json", "description": "test-blob"}
+    # assert latest_blob == {"name": "1234567890.json", "description": "test-blob"}
+    assert latest_blob.name == "1234567890.json"
 
 
-@mock.patch("cloud_storage.main.get_blobs_list")
-@mock.patch("cloud_storage.main.get_bucket")
+@mock.patch("app.main.get_blobs_list")
+@mock.patch("app.main.get_bucket")
 def test_get_latest_blob_returns_latest_blob_when_multiple_exist(
     mock_get_bucket, mock_get_blobs
 ):
+    mock_blob_latest = mock.Mock()
+    mock_blob_latest.name = "1234567890.json"
+    mock_blob_oldest = mock.Mock()
+    mock_blob_oldest.name = "1000000000.json"
     mock_get_bucket.return_value = "my-bucket"
-    mock_get_blobs.return_value = [
-        {"name": "1000000000.json", "description": "oldest-blob"},
-        {"name": "1234567890.json", "description": "latest-blob"},
-    ]
+    mock_get_blobs.return_value = [mock_blob_oldest, mock_blob_latest]
 
     latest_blob = main.get_latest_blob()
 
     assert mock_get_bucket.called is True
     assert mock_get_blobs.called is True
-    assert latest_blob == {"name": "1234567890.json", "description": "latest-blob"}
+    assert latest_blob.name == "1234567890.json"
 
 
 def test_rate_instructors_returns_empty_dict_when_no_instructors():
@@ -101,7 +105,7 @@ def test_rate_instructors_returns_empty_dict_when_no_instructors():
     assert rated_instructors == {}
 
 
-@mock.patch("cloud_storage.main.get_instructor")
+@mock.patch("app.main.get_instructor")
 def test_rate_instructors_returns_rated_instructor_when_instructor_rating(
     mock_get_instructor
 ):
@@ -122,7 +126,7 @@ def test_rate_instructors_returns_rated_instructor_when_instructor_rating(
 
 
 @pytest.mark.skip(reason="Getting inconsistent result with the assertion")
-@mock.patch("cloud_storage.main.get_instructor")
+@mock.patch("app.main.get_instructor")
 def test_rate_instructors_returns_multiple_rated_instructors(mock_get_instructor):
     mock_get_instructor.side_effect = [
         ("Jane", "Doe", 4.0, 12345),
@@ -156,7 +160,7 @@ def test_rate_instructors_returns_multiple_rated_instructors(mock_get_instructor
 
 
 @pytest.mark.skip(reason="Getting inconsistent result with the assertion")
-@mock.patch("cloud_storage.main.get_instructor")
+@mock.patch("app.main.get_instructor")
 def test_rate_instructors_returns_instructor_when_name_not_exists(mock_get_instructor):
     mock_get_instructor.side_effect = [("Jane", "Doe", 4.0, 12345), ValueError()]
     instructors = {"Jane Doe", "John Doe"}
