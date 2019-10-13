@@ -44,8 +44,6 @@ def get_instructors(contents):
     Return:
         Set: A set of the instructors found in contents, with 'TBD' as the
              name of missing instructors
-    Example:
-    { Alice, Bob }
     """
     return set([x.get("instructor", "TBD") for x in contents])
 
@@ -76,18 +74,6 @@ def rate_instructors(instructors):
 
     Returns:
         List: List of dictionaries of instructor information
-            {
-                instructorName: {
-                    "fullName": String,
-                    "firstName": String,
-                    "lastName": String,
-                    "rating": Float,
-                    "rmpId": Integer,
-                },
-                instructorName: {
-                    "fullName": "TBD"   // if the instructor doesn't exist
-                }
-            }
     """
     assert isinstance(instructors, set)
     rated = OrderedDict()
@@ -130,7 +116,6 @@ def inject_rated_instructors(contents, rated_instructors):
     return contents
 
 
-# if __name__ == "__main__":
 def run():
     latest_blob = get_latest_blob()
     contents = latest_blob.download_as_string()
