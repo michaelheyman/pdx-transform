@@ -1,9 +1,11 @@
-from cloud_storage import config
 import json
 import os
-from cloud_storage.ratemyprofessors import RateMyProfessors
 from collections import OrderedDict
+
 from google.cloud import storage
+
+from app import config
+from app.ratemyprofessors import RateMyProfessors
 
 
 def get_bucket():
@@ -27,7 +29,7 @@ def get_latest_blob():
 
     blobs = get_blobs_list()
     print(f"blobs {blobs}")
-    latest_blob = max(blobs, key=lambda x: x["name"], default=None)
+    latest_blob = max(blobs, key=lambda x: x.name, default=None)
 
     return latest_blob
 
@@ -38,7 +40,7 @@ def get_instructors(contents):
     Parameters:
         contents (Dictionary): The dictionary representing the JSON contents
                                of the bucket
-    
+
     Return:
         Set: A set of the instructors found in contents, with 'TBD' as the
              name of missing instructors
@@ -71,10 +73,10 @@ def rate_instructors(instructors):
 
     Parameters:
         instructors (Set): Set of instructors to rate
-    
+
     Returns:
         List: List of dictionaries of instructor information
-            { 
+            {
                 instructorName: {
                     "fullName": String,
                     "firstName": String,
@@ -114,7 +116,7 @@ def inject_rated_instructors(contents, rated_instructors):
     Parameters:
         contents (List):          List of dictionaries representing instructors
         rated_instructors (Dict): Dictionary of instructors and their information
-    
+
     Returns:
         List: The `contents` with the instructors field replaced with the
               instructor in `instructors`
@@ -128,12 +130,12 @@ def inject_rated_instructors(contents, rated_instructors):
     return contents
 
 
-if __name__ == "__main__":
+# if __name__ == "__main__":
+def run():
     latest_blob = get_latest_blob()
     contents = latest_blob.download_as_string()
     try:
         contents_json = json.loads(contents)
-        # contents_json = load_local_blob()
     except json.decoder.JSONDecodeError as e:
         print(f"Error decoding JSON: {e}")
         exit()
@@ -142,4 +144,4 @@ if __name__ == "__main__":
     print(instructors)
     rated_instructors = rate_instructors(instructors)
 
-    updated_contents = inject_rated_instructors(contents_json, rated_instructors)
+    inject_rated_instructors(contents_json, rated_instructors)

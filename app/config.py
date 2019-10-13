@@ -6,7 +6,7 @@ def map_level(level):
 
     Parameters:
         level (String): The level string to be mapped.
-    
+
     Returns:
         Integer: Number that matches the logging level.
     """
@@ -15,6 +15,6 @@ def map_level(level):
     )
 
 
-UNPROCESSED_BUCKET_NAME = os.environ.get("BUCKET_NAME", "my-different-bucket")
-PROCESSED_BUCKET_NAME = os.environ.get("BUCKET_NAME", "processed-data")
 LOGGING_LEVEL = map_level(os.environ.get("LOGGING_LEVEL", "debug"))
+PROCESSED_BUCKET_NAME = os.environ.get("BUCKET_NAME", "processed-data")
+UNPROCESSED_BUCKET_NAME = os.environ.get("BUCKET_NAME", "my-different-bucket")
