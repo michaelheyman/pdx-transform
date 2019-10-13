@@ -1,23 +1,32 @@
-import config
+from cloud_storage import config
 import json
 import os
-from ratemyprofessors import RateMyProfessors
+from cloud_storage.ratemyprofessors import RateMyProfessors
 from google.cloud import storage
 
-storage_client = storage.Client()
+
+def get_bucket():
+    storage_client = storage.Client()
+    bucket_name = config.UNPROCESSED_BUCKET_NAME
+    return storage_client.lookup_bucket(bucket_name)
+
+
+def get_blobs_list():
+    storage_client = storage.Client()
+    bucket_name = config.UNPROCESSED_BUCKET_NAME
+    return list(storage_client.list_blobs(bucket_name))
 
 
 def get_latest_blob():
-    bucket_name = config.UNPROCESSED_BUCKET_NAME
-    bucket = storage_client.lookup_bucket(bucket_name)
+    bucket = get_bucket()
 
     if bucket is None:
         print("Bucket does not exist. Exiting program.")
         return None
 
-    blobs = list(storage_client.list_blobs(bucket_name))
+    blobs = get_blobs_list()
     print(f"blobs {blobs}")
-    latest_blob = max(blobs, key=lambda x: x.name)
+    latest_blob = max(blobs, key=lambda x: x["name"], default=None)
 
     return latest_blob
 
