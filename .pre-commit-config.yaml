@@ -23,6 +23,7 @@
   - id: tests
     name: pytest
     entry: pytest -vv
+    pass_filenames: false
     language: system
     types: [python]
     stages: [push]
