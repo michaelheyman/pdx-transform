@@ -2,6 +2,7 @@ from cloud_storage import config
 import json
 import os
 from cloud_storage.ratemyprofessors import RateMyProfessors
+from collections import OrderedDict
 from google.cloud import storage
 
 
@@ -87,7 +88,7 @@ def rate_instructors(instructors):
             }
     """
     assert isinstance(instructors, set)
-    rated = {}
+    rated = OrderedDict()
 
     for instructor in instructors:
         try:

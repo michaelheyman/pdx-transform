@@ -1,21 +1,24 @@
 import mock
 import pytest
+from collections import OrderedDict
 from tests import mocks
 from cloud_storage import main
 
 
+@mock.patch("google.cloud.storage.Client.lookup_bucket")
+@mock.patch("google.cloud.storage.Client")
+def test_get_bucket(mock_storage_client, mock_lookup_bucket):
+    # mock_storage_client.return_value = []
+    mock_storage_client().lookup_bucket.return_value = None
+    # mock_lookup_bucket.return_value = []
+
+    get_bucket = main.get_bucket()
+
+    assert get_bucket == None
+
+
 def test_get_instructors_returns_unique_instructors():
     contents = mocks.contents
-    # contents = [
-    #     {"instructor": "Mark P Jones"},
-    #     {"instructor": "David D Ely"},
-    #     {"instructor": "Wuchan Feng"},
-    #     {"instructor": "Mark Morrissey"},
-    #     {"instructor": "TBD"},
-    #     {"instructor": "Chris Gilmore"},
-    #     {"instructor": "David D Ely"},
-    #     {"instructor": "Katie Casamento"},
-    # ]
     contents = [
         {"instructor": "Alice"},
         {"instructor": "Alice"},
@@ -127,23 +130,28 @@ def test_rate_instructors_returns_multiple_rated_instructors(mock_get_instructor
     instructors = {"Jane Doe", "John Doe"}
 
     rated_instructors = main.rate_instructors(instructors)
+    expected = OrderedDict(
+        {
+            "Jane Doe": {
+                "fullName": "Jane Doe",
+                "firstName": "Jane",
+                "lastName": "Doe",
+                "rating": 4.0,
+                "rmpId": 12345,
+            },
+            "John Doe": {
+                "fullName": "John Doe",
+                "firstName": "John",
+                "lastName": "Doe",
+                "rating": 3.5,
+                "rmpId": 98765,
+            },
+        }
+    )
 
-    assert rated_instructors == {
-        "Jane Doe": {
-            "fullName": "Jane Doe",
-            "firstName": "Jane",
-            "lastName": "Doe",
-            "rating": 4.0,
-            "rmpId": 12345,
-        },
-        "John Doe": {
-            "fullName": "John Doe",
-            "firstName": "John",
-            "lastName": "Doe",
-            "rating": 3.5,
-            "rmpId": 98765,
-        },
-    }
+    print(f"rated instructors: {rated_instructors}")
+    print(f"expected: {expected}")
+    assert rated_instructors == expected
 
 
 @mock.patch("cloud_storage.main.get_instructor")
@@ -153,6 +161,7 @@ def test_rate_instructors_returns_instructor_when_name_not_exists(mock_get_instr
 
     rated_instructors = main.rate_instructors(instructors)
 
+    print(f"rated inst: {rated_instructors}")
     assert rated_instructors == {
         "Jane Doe": {
             "fullName": "Jane Doe",
