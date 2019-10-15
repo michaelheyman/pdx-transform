@@ -1,5 +1,4 @@
 import json
-import os
 from collections import OrderedDict
 
 from google.cloud import storage
@@ -41,17 +40,6 @@ def get_instructors(contents):
              name of missing instructors
     """
     return set([x.get("instructor", "TBD") for x in contents])
-
-
-def load_local_blob():
-    """ Loads the contents of a JSON file used for local testing
-
-    Returns:
-        Dictionary: A dictionary representation of the contents of the file
-    """
-    filename = os.path.join(os.path.dirname(__file__), "blob.json")
-    with open(filename) as json_file:
-        return json.loads(json_file.read())
 
 
 def get_instructor(instructor):
