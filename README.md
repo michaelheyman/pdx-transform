@@ -69,3 +69,13 @@ pytest --cov=app tests/
 ```bash
 pytest --cov-report html --cov=app tests/
 ```
+
+## Deploying Cloud Function
+
+Run the following command from the root of the project to deploy the Cloud Function
+
+```bash
+gcloud functions deploy process_json --memory=1024MB --runtime python37 --trigger-http --region us-central1
+```
+
+There is the potential to reduce the memory requirements of the Function.
