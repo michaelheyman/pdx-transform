@@ -5,6 +5,7 @@ from datetime import datetime
 from google.cloud import storage
 
 from app import config
+from app.logger import logger
 from app.ratemyprofessors import RateMyProfessors
 
 
@@ -19,11 +20,11 @@ def get_latest_blob():
     bucket = storage_client.lookup_bucket(bucket_name)
 
     if bucket is None:
-        print("Bucket does not exist. Exiting program.")
+        logger.critical("Bucket does not exist. Exiting program.")
         return None
 
     blobs = list(storage_client.list_blobs(bucket_name))
-    print(f"blobs {blobs}")
+    logger.debug(f"blobs {blobs}")
     latest_blob = max(blobs, key=lambda x: x.name, default=None)
 
     return latest_blob
@@ -40,7 +41,12 @@ def get_instructors(contents):
         Set: A set of the instructors found in contents, with 'TBD' as the
              name of missing instructors
     """
-    return set([x.get("instructor", "TBD") for x in contents])
+    instructors = set()
+    for term in contents:
+        for discipline in term:
+            instructors.add(discipline.get("instructor", "TBD"))
+
+    return instructors
 
 
 def get_instructor(instructor):
@@ -73,10 +79,11 @@ def rate_instructors(instructors):
                 "rmpId": rmp_id,
             }
         except ValueError:
-            print(f"RateMyProfessors found no record of instructor '{instructor}'")
+            logger.info(
+                f"RateMyProfessors found no record of instructor '{instructor}'"
+            )
             rated[instructor] = {"fullName": instructor}
 
-    print(rated)
     return rated
 
 
@@ -92,10 +99,12 @@ def inject_rated_instructors(contents, rated_instructors):
               instructor in `instructors`
     """
     assert isinstance(contents, list)
-    for course in contents:
-        instructor_name = course["instructor"]
-        if instructor_name in rated_instructors.keys():
-            course["instructor"] = rated_instructors[instructor_name]
+    for term in contents:
+        for course in term:
+            instructor_name = course["instructor"]
+
+            if instructor_name in rated_instructors.keys():
+                course["instructor"] = rated_instructors[instructor_name]
 
     return contents
 
@@ -133,9 +142,9 @@ def upload_to_bucket(contents):
 
     if bucket is None:
         bucket = storage_client.create_bucket(bucket_name)
-        print("Bucket {} created.".format(bucket.name))
+        logger.info("Bucket {} created.".format(bucket.name))
     else:
-        print("Bucket {} already exists.".format(bucket.name))
+        logger.info("Bucket {} already exists.".format(bucket.name))
 
     filename = generate_filename()
 
@@ -145,7 +154,7 @@ def upload_to_bucket(contents):
     # uploads the file in the cloud function to cloud storage
     blob.upload_from_filename(lambda_filename)
 
-    print("File {} uploaded to {}.".format(filename, bucket_name))
+    logger.info("File {} uploaded to {}.".format(filename, bucket_name))
 
 
 def write_lambda_file(filename, contents):
@@ -163,7 +172,7 @@ def write_lambda_file(filename, contents):
     with open(lambda_filename, "w") as outfile:
         json.dump(contents, outfile)
 
-    print(f"file: {outfile}")
+    logger.debug(f"file: {outfile}")
 
     return lambda_filename
 
@@ -174,11 +183,11 @@ def run():
     try:
         contents_json = json.loads(contents)
     except json.decoder.JSONDecodeError as e:
-        print(f"Error decoding JSON: {e}")
+        logger.error(f"Error decoding JSON: {e}")
         exit()
 
     instructors = get_instructors(contents_json)
-    print(instructors)
+    logger.info(f"Found {len(instructors)} unique instructors")
     rated_instructors = rate_instructors(instructors)
 
     processed_data = inject_rated_instructors(contents_json, rated_instructors)

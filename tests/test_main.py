@@ -10,11 +10,13 @@ from tests import data
 def test_get_instructors_returns_unique_instructors():
     contents = data.contents
     contents = [
-        {"instructor": "Alice"},
-        {"instructor": "Alice"},
-        {"instructor": "Bob"},
-        {"instructor": "John"},
-        {"instructor": "John"},
+        [
+            {"instructor": "Alice"},
+            {"instructor": "Alice"},
+            {"instructor": "Bob"},
+            {"instructor": "John"},
+            {"instructor": "John"},
+        ]
     ]
 
     instructor_set = main.get_instructors(contents)
@@ -23,7 +25,7 @@ def test_get_instructors_returns_unique_instructors():
 
 
 def test_get_instructors_returns_tbd_for_missing_instructors():
-    contents = [{"instructor": "Alice"}, {"instructor": "Bob"}, {"name": "John Doe"}]
+    contents = [[{"instructor": "Alice"}, {"instructor": "Bob"}, {"name": "John Doe"}]]
 
     instructor_set = main.get_instructors(contents)
 
@@ -40,7 +42,6 @@ def test_get_instructors_returns_empty_set_when_empty_instructors():
 
 @mock.patch("google.cloud.storage.Client")
 def test_get_latest_blob_returns_none_when_bucket_does_not_exist(mock_storage_client):
-    # mock_get_bucket.return_value = None
     mock_storage_client().lookup_bucket.return_value = None
 
     latest_blob = main.get_latest_blob()
@@ -182,7 +183,7 @@ def test_inject_rated_instructors_returns_unchanged_contents_if_empty():
 
 
 def test_inject_rated_instructors_returns_injected_instructor():
-    contents = [{"instructor": "Jane Doe"}]
+    contents = [[{"instructor": "Jane Doe"}]]
     rated_instructors = {
         "Jane Doe": {
             "fullName": "Jane Doe",
@@ -196,20 +197,22 @@ def test_inject_rated_instructors_returns_injected_instructor():
     main.inject_rated_instructors(contents, rated_instructors)
 
     assert contents == [
-        {
-            "instructor": {
-                "fullName": "Jane Doe",
-                "firstName": "Jane",
-                "lastName": "Doe",
-                "rating": 4.0,
-                "rmpId": 12345,
+        [
+            {
+                "instructor": {
+                    "fullName": "Jane Doe",
+                    "firstName": "Jane",
+                    "lastName": "Doe",
+                    "rating": 4.0,
+                    "rmpId": 12345,
+                }
             }
-        }
+        ]
     ]
 
 
 def test_inject_rated_instructors_returns_contents_when_instructors_dont_match():
-    contents = [{"instructor": "Jane Doe"}]
+    contents = [[{"instructor": "Jane Doe"}]]
     rated_instructors = {
         "John Doe": {
             "fullName": "John Doe",
