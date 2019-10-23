@@ -1,14 +1,14 @@
+import unittest.mock as mock
 from collections import OrderedDict
 
-import mock
 import pytest
 
 from app import main
-from tests import mocks
+from tests import data
 
 
 def test_get_instructors_returns_unique_instructors():
-    contents = mocks.contents
+    contents = data.contents
     contents = [
         {"instructor": "Alice"},
         {"instructor": "Alice"},
