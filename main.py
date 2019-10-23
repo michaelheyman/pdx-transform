@@ -1,5 +1,5 @@
 from app import main
 
 
-def process_json(context):
+def transform(context):
     main.run()

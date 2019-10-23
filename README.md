@@ -1,11 +1,11 @@
-# poc-cloud-storage
+# pdx-transform
 
-[poc-cloud-storage](https://github.com/michaelheyman/poc-cloud-storage/) is part of the
+[pdx-transform](https://github.com/michaelheyman/pdx-transform/) is part of the
 [pdx-schedule](https://github.com/michaelheyman/pdx-schedule/) project.
 
 Runs a Cloud Function that retrieves the latest unprocessed structured JSON data
 from a bucket that has the output of running
-[poc-google-function](https://github.com/michaelheyman/poc-google-function/).
+[pdx-extract](https://github.com/michaelheyman/pdx-extract/).
 
 The purpose of this Cloud Function is then to extract the instructor information
 from the unprocessed structured JSON, retreive instructor metadata, and inject
@@ -16,8 +16,8 @@ back the instructor information with that metadata.
 ### Create Virtual Environment
 
 ```bash
-pyenv virtualenv 3.7.3 poc-cloud-storage-3.7.3
-pyenv activate poc-cloud-storage-3.7.3
+pyenv virtualenv 3.7.3 pdx-transform-3.7.3
+pyenv activate pdx-transform-3.7.3
 ```
 
 ### Install Requirements
@@ -75,7 +75,7 @@ pytest --cov-report html --cov=app tests/
 Run the following command from the root of the project to deploy the Cloud Function
 
 ```bash
-gcloud functions deploy process_json --memory=1024MB --runtime python37 --trigger-http --region us-central1
+gcloud functions deploy transform --timeout=540 --memory=1024MB --runtime python37 --trigger-http --region us-central1
 ```
 
 There is the potential to reduce the memory requirements of the Function.
