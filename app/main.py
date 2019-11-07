@@ -103,7 +103,9 @@ def inject_rated_instructors(contents, rated_instructors):
         for course in term:
             instructor_name = course["instructor"]
 
-            if instructor_name in rated_instructors.keys():
+            if instructor_name not in rated_instructors.keys():
+                course["instructor"] = {"fullName": instructor_name}
+            else:
                 course["instructor"] = rated_instructors[instructor_name]
 
     return contents
@@ -188,6 +190,7 @@ def run():
 
     instructors = get_instructors(contents_json)
     logger.info(f"Found {len(instructors)} unique instructors")
+
     rated_instructors = rate_instructors(instructors)
 
     processed_data = inject_rated_instructors(contents_json, rated_instructors)
