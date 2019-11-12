@@ -49,7 +49,7 @@ def test_upload_to_bucket_returns_none_when_no_bucket(mock_storage_client):
     mock_created_bucket.name = "test-bucket"
     mock_storage_client().lookup_bucket.return_value = None
     mock_storage_client().create_bucket.return_value = mock_created_bucket
-    contents = {}
+    contents = {"foo": "bar"}
 
     storage.upload_to_bucket(contents)
 
@@ -69,7 +69,7 @@ def test_upload_to_bucket_runs_until_end(
     lookup_bucket.blob.return_value = bucket_blob
     mock_storage_client().lookup_bucket.return_value = lookup_bucket
     mock_generate_filename.return_value = "1234567890.json"
-    contents = {}
+    contents = {"foo": "bar"}
 
     storage.upload_to_bucket(contents)
 

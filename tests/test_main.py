@@ -9,15 +9,15 @@ from tests import data
 
 def test_get_instructors_returns_unique_instructors():
     contents = data.contents
-    contents = [
-        [
+    contents = {
+        "202001": [
             {"instructor": "Alice"},
             {"instructor": "Alice"},
             {"instructor": "Bob"},
             {"instructor": "John"},
             {"instructor": "John"},
         ]
-    ]
+    }
 
     instructor_set = main.get_instructors(contents)
 
@@ -25,7 +25,9 @@ def test_get_instructors_returns_unique_instructors():
 
 
 def test_get_instructors_returns_tbd_for_missing_instructors():
-    contents = [[{"instructor": "Alice"}, {"instructor": "Bob"}, {"name": "John Doe"}]]
+    contents = {
+        "202001": [{"instructor": "Alice"}, {"instructor": "Bob"}, {"name": "John Doe"}]
+    }
 
     instructor_set = main.get_instructors(contents)
 
@@ -33,7 +35,7 @@ def test_get_instructors_returns_tbd_for_missing_instructors():
 
 
 def test_get_instructors_returns_empty_set_when_empty_instructors():
-    contents = []
+    contents = {}
 
     instructor_set = main.get_instructors(contents)
 
@@ -124,16 +126,16 @@ def test_rate_instructors_returns_instructor_when_name_not_exists(mock_get_instr
 
 
 def test_inject_rated_instructors_returns_unchanged_contents_if_empty():
-    contents = []
+    contents = {}
     rated_instructors = []
 
     main.inject_rated_instructors(contents, rated_instructors)
 
-    assert contents == []
+    assert contents == {}
 
 
 def test_inject_rated_instructors_returns_injected_instructor():
-    contents = [[{"instructor": "Jane Doe"}]]
+    contents = {"202001": [{"instructor": "Jane Doe"}]}
     rated_instructors = {
         "Jane Doe": {
             "fullName": "Jane Doe",
@@ -146,8 +148,8 @@ def test_inject_rated_instructors_returns_injected_instructor():
 
     main.inject_rated_instructors(contents, rated_instructors)
 
-    assert contents == [
-        [
+    assert contents == {
+        "202001": [
             {
                 "instructor": {
                     "fullName": "Jane Doe",
@@ -158,11 +160,11 @@ def test_inject_rated_instructors_returns_injected_instructor():
                 }
             }
         ]
-    ]
+    }
 
 
 def test_inject_rated_instructors_returns_contents_when_instructors_dont_match():
-    contents = [[{"instructor": "Jane Doe"}]]
+    contents = {"202001": [{"instructor": "Jane Doe"}]}
     rated_instructors = {
         "John Doe": {
             "fullName": "John Doe",

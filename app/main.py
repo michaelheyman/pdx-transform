@@ -18,9 +18,9 @@ def get_instructors(contents):
              name of missing instructors
     """
     instructors = set()
-    for term in contents:
-        for discipline in term:
-            instructors.add(discipline.get("instructor", "TBD"))
+    for term_code, term in contents.items():
+        for course in term:
+            instructors.add(course.get("instructor", "TBD"))
 
     return instructors
 
@@ -67,15 +67,15 @@ def inject_rated_instructors(contents, rated_instructors):
     """ Add rated instructors back to the instructor dictionary
 
     Parameters:
-        contents (List):          List of dictionaries representing instructors
+        contents (Dict):          Dictionary of dictionaries representing instructors
         rated_instructors (Dict): Dictionary of instructors and their information
 
     Returns:
-        List: The `contents` with the instructors field replaced with the
+        Dictionary: The `contents` with the instructors field replaced with the
               instructor in `instructors`
     """
-    assert isinstance(contents, list)
-    for term in contents:
+    assert isinstance(contents, dict)
+    for term_code, term in contents.items():
         for course in term:
             instructor_name = course["instructor"]
 
