@@ -23,7 +23,7 @@ def get_latest_blob():
 
     blobs = list(storage_client.list_blobs(bucket_name))
     logger.debug(f"blobs {blobs}")
-    latest_blob = max(blobs, key=lambda x: x.name, default=None)
+    latest_blob = max(blobs, key=lambda x: x.updated, default=None)
 
     return latest_blob
 

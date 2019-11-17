@@ -1,4 +1,6 @@
 import unittest.mock as mock
+from datetime import datetime
+from datetime import timedelta
 
 from app import storage
 
@@ -31,8 +33,10 @@ def test_get_latest_blob_returns_blob_when_only_one_blob_exists(mock_storage_cli
 def test_get_latest_blob_returns_latest_blob_when_multiple_exist(mock_storage_client):
     mock_blob_latest = mock.Mock()
     mock_blob_latest.name = "1234567890.json"
+    mock_blob_latest.updated = datetime.now()
     mock_blob_oldest = mock.Mock()
     mock_blob_oldest.name = "1000000000.json"
+    mock_blob_oldest.updated = datetime.now() - timedelta(1)
     mock_storage_client().lookup_bucket.return_value = "test-bucket"
     mock_storage_client().list_blobs.return_value = [mock_blob_oldest, mock_blob_latest]
 
