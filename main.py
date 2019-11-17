@@ -1,5 +1,5 @@
 from app import main
 
 
-def transform(context):
+def transform(event, context):
     main.run()

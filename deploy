@@ -1,0 +1,11 @@
+#!/bin/sh
+
+BUCKET=pdx-schedule-unprocessed-data
+FUNCTION_NAME=transform
+
+gcloud functions deploy $FUNCTION_NAME \
+  --timeout=540 \
+  --memory=1024MB \
+  --runtime python37 \
+  --trigger-bucket=$BUCKET \
+  --region us-central1
