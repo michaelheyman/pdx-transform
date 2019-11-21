@@ -7,15 +7,11 @@ from app.ratemyprofessors import RateMyProfessors
 
 
 def get_instructors(contents):
-    """ Extract a set of the instructors from the JSON bucket contents
+    """Extract a set of the instructors from the JSON bucket contents
 
-    Parameters:
-        contents (Dictionary): The dictionary representing the JSON contents
-                               of the bucket
-
-    Return:
-        Set: A set of the instructors found in contents, with 'TBD' as the
-             name of missing instructors
+    :param contents: The dictionary representing the JSON contents of the bucket
+    :return: A set of the instructors found in contents, with 'TBD' as the name
+             of missing instructors
     """
     instructors = set()
     for term_code, term in contents.items():
@@ -26,20 +22,15 @@ def get_instructors(contents):
 
 
 def get_instructor(instructor):
-    """ This is only here until I can figure out how to
-    mock this call in the unit tests
-    """
+    """This is only here until I can figure out how to mock this call in the unit tests"""
     return RateMyProfessors.get_instructor(instructor)
 
 
 def rate_instructors(instructors):
-    """ Rate instructors according to their RateMyProfessor information
+    """Rate instructors according to their RateMyProfessor information
 
-    Parameters:
-        instructors (Set): Set of instructors to rate
-
-    Returns:
-        List: List of dictionaries of instructor information
+    :param instructors: Set of instructors to rate
+    :return: List of dictionaries of instructor information
     """
     assert isinstance(instructors, set)
     rated = OrderedDict()
@@ -64,15 +55,11 @@ def rate_instructors(instructors):
 
 
 def inject_rated_instructors(contents, rated_instructors):
-    """ Add rated instructors back to the instructor dictionary
+    """Add rated instructors back to the instructor dictionary
 
-    Parameters:
-        contents (Dict):          Dictionary of dictionaries representing instructors
-        rated_instructors (Dict): Dictionary of instructors and their information
-
-    Returns:
-        Dictionary: The `contents` with the instructors field replaced with the
-              instructor in `instructors`
+    :param contents: Dictionary of dictionaries representing instructors
+    :param rated_instructors: Dictionary of instructors and their information
+    :return: The `contents` with the instructors field replaced with the instructor in `instructors`
     """
     assert isinstance(contents, dict)
     for term_code, term in contents.items():

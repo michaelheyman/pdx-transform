@@ -6,12 +6,9 @@ def get_current_timestamp():
 
 
 def generate_filename():
-    """ Generates a filename to be put into a Storage bucket.
+    """Generates a filename to be put into a Storage bucket.
 
-    Returns:
-        String: A filename in the format epoc.json
-        Example:
-            137281912.json
+    :return: A filename in the format epoc.json
     """
     date_format = "%Y%m%d%H%M%S"
     timestamp = get_current_timestamp()
